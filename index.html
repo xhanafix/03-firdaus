@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjana Penulisan FM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <header>
+            <h1>Penjana Penulisan FM</h1>
+            <div class="theme-toggle">
+                <button id="themeToggle">
+                    <span class="light-icon">☀️</span>
+                    <span class="dark-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="api-setup" id="apiSetup">
+            <h2>Tetapan API</h2>
+            <input type="password" id="apiKey" placeholder="Masukkan API key OpenRouter">
+            <button id="saveApiKey">Simpan API Key</button>
+        </div>
+
+        <main class="content">
+            <div class="input-section">
+                <textarea id="promptInput" placeholder="Masukkan topik penulisan anda di sini..."></textarea>
+                <button id="generateBtn">Jana Penulisan</button>
+            </div>
+
+            <div class="output-section">
+                <div id="loadingIndicator" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Sedang menjana penulisan...</p>
+                </div>
+                <div class="output-header">
+                    <h3>Hasil Penulisan</h3>
+                    <button id="copyButton" class="copy-button" title="Salin ke clipboard">
+                        <span class="copy-icon">📋</span>
+                        <span class="copy-text">Salin</span>
+                    </button>
+                </div>
+                <div id="output" class="output-content"></div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

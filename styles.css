@@ -1,0 +1,341 @@
+:root {
+    --bg-light: #ffffff;
+    --text-light: #333333;
+    --primary-light: #4a90e2;
+    --secondary-light: #f5f5f5;
+    
+    --bg-dark: #1a1a1a;
+    --text-dark: #ffffff;
+    --primary-dark: #64b5f6;
+    --secondary-dark: #2d2d2d;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.theme-toggle button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.input-section {
+    margin-bottom: 2rem;
+}
+
+textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+    background-color: inherit;
+    color: inherit;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--primary-light);
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.dark-theme button {
+    background-color: var(--primary-dark);
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.output-content {
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--secondary-light);
+}
+
+.dark-theme .output-content {
+    background-color: var(--secondary-dark);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-light);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+.progress-wrapper {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--secondary-dark);
+    border-radius: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-dark);
+    width: 0;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.output-content {
+    padding: 2rem;
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.output-content h1 {
+    font-size: 1.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+}
+
+.output-content h2 {
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.output-content .intro {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.output-content .emoji {
+    font-size: 1.4rem;
+    vertical-align: middle;
+    margin: 0 0.2rem;
+    display: inline-block;
+    transform: translateY(-1px);
+}
+
+.output-content .number-emoji {
+    font-size: 1.6rem;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.output-content .checkmark-item,
+.output-content .bullet-item {
+    margin: 0.8rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.output-content .example {
+    background: rgba(100, 181, 246, 0.1);
+    padding: 1rem;
+    border-left: 4px solid var(--primary-dark);
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.output-content .pro-tip {
+    background: rgba(255, 193, 7, 0.1);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+}
+
+.output-content .cta-section {
+    background: rgba(100, 181, 246, 0.15);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.output-content .hashtag {
+    color: var(--primary-dark);
+    font-weight: 500;
+    margin-right: 0.5rem;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background: rgba(100, 181, 246, 0.1);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.output-content .hashtag:hover {
+    background: rgba(100, 181, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Dark theme adjustments */
+.dark-theme .output-content .example {
+    background: rgba(100, 181, 246, 0.05);
+}
+
+.dark-theme .output-content .pro-tip {
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.dark-theme .output-content .cta-section {
+    background: rgba(100, 181, 246, 0.08);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .output-content {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    .output-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .output-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .output-content .intro {
+        font-size: 1.1rem;
+    }
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--secondary-dark);
+    border-radius: 8px 8px 0 0;
+}
+
+.output-header h3 {
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.copy-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary-dark);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.copy-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.copy-button:active {
+    transform: translateY(0);
+}
+
+.copy-button.copied {
+    background: #4caf50;
+}
+
+.copy-icon {
+    font-size: 1.2rem;
+}
+
+.copy-text {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .copy-text {
+        display: none;
+    }
+    
+    .copy-button {
+        padding: 0.5rem;
+    }
+}
+
+/* Add styles for hashtag container */
+.hashtag-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(100, 181, 246, 0.05);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.dark-theme .hashtag-container {
+    background: rgba(100, 181, 246, 0.08);
+}
