@@ -3,22 +3,29 @@ class FMWriter {
         this.apiKey = localStorage.getItem('openRouterApiKey');
         this.lastRequestTime = 0;
         this.minRequestInterval = 2000; // Minimum 2 seconds between requests
+        this.history = JSON.parse(localStorage.getItem('fmWriterHistory') || '[]');
         this.initializeElements();
         this.setupEventListeners();
         this.copyButton = document.getElementById('copyButton');
         this.setupCopyButton();
         this.setupAutoSave();
+        this.loadHistory();
     }
 
     initializeElements() {
         this.apiKeyInput = document.getElementById('apiKey');
         this.saveApiKeyBtn = document.getElementById('saveApiKey');
+        this.productInput = document.getElementById('productInput');
+        this.issuesInput = document.getElementById('issuesInput');
+        this.topicInput = document.getElementById('topicInput');
         this.promptInput = document.getElementById('promptInput');
         this.generateBtn = document.getElementById('generateBtn');
         this.output = document.getElementById('output');
         this.loadingIndicator = document.getElementById('loadingIndicator');
         this.themeToggle = document.getElementById('themeToggle');
         this.apiSetup = document.getElementById('apiSetup');
+        this.historyList = document.getElementById('historyList');
+        this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
         // Hide API setup if key exists
         if (this.apiKey) {
@@ -30,6 +37,7 @@ class FMWriter {
         this.saveApiKeyBtn.addEventListener('click', () => this.saveApiKey());
         this.generateBtn.addEventListener('click', () => this.generateContent());
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
     }
 
     saveApiKey() {
@@ -57,19 +65,29 @@ class FMWriter {
     }
 
     setupAutoSave() {
-        // Auto-save prompt every 30 seconds
+        // Auto-save inputs every 30 seconds
         setInterval(() => {
+            const product = this.productInput.value.trim();
+            const issues = this.issuesInput.value.trim();
+            const topic = this.topicInput.value.trim();
             const prompt = this.promptInput.value.trim();
-            if (prompt) {
-                localStorage.setItem('lastPrompt', prompt);
+            
+            if (product || issues || topic || prompt) {
+                localStorage.setItem('lastFormData', JSON.stringify({
+                    product,
+                    issues,
+                    topic,
+                    prompt
+                }));
             }
         }, 30000);
 
-        // Restore last prompt
-        const lastPrompt = localStorage.getItem('lastPrompt');
-        if (lastPrompt) {
-            this.promptInput.value = lastPrompt;
-        }
+        // Restore last inputs
+        const lastFormData = JSON.parse(localStorage.getItem('lastFormData') || '{}');
+        if (lastFormData.product) this.productInput.value = lastFormData.product;
+        if (lastFormData.issues) this.issuesInput.value = lastFormData.issues;
+        if (lastFormData.topic) this.topicInput.value = lastFormData.topic;
+        if (lastFormData.prompt) this.promptInput.value = lastFormData.prompt;
     }
 
     showNotification(message, type = 'info') {
@@ -88,15 +106,49 @@ class FMWriter {
         }, 3000);
     }
 
+    constructPrompt() {
+        const product = this.productInput.value.trim();
+        const issues = this.issuesInput.value.trim();
+        const topic = this.topicInput.value.trim();
+        const additionalInfo = this.promptInput.value.trim();
+        
+        if (!product && !topic) {
+            return '';
+        }
+        
+        let prompt = '';
+        
+        if (product) {
+            prompt += `Produk/Perkhidmatan: ${product}\n\n`;
+        }
+        
+        if (issues) {
+            prompt += `Cabaran/Keperluan Audiens: ${issues}\n\n`;
+        }
+        
+        if (topic) {
+            prompt += `Topik: ${topic}\n\n`;
+        }
+        
+        if (additionalInfo) {
+            prompt += `Maklumat Tambahan: ${additionalInfo}\n\n`;
+        }
+        
+        // Add extra guidance to make the output more natural but professional
+        prompt += `\nPenting: Kongsi ilmu ini seperti berbual dengan pembaca secara profesional, bukan seperti menulis artikel formal. Elakkan frasa seperti "artikel ini akan membincangkan". Gunakan "kami" bukan "aku" atau "saya". Selit pengalaman kami untuk menjadikannya lebih relevan dan tulis seperti post Facebook yang profesional. Pastikan keseimbangan antara mesra tetapi profesional.\n`;
+        
+        return prompt.trim();
+    }
+
     async generateContent() {
         if (!this.apiKey) {
             this.showNotification('Sila masukkan API key terlebih dahulu', 'error');
             return;
         }
 
-        const prompt = this.promptInput.value.trim();
+        const prompt = this.constructPrompt();
         if (!prompt) {
-            this.showNotification('Sila masukkan topik penulisan', 'error');
+            this.showNotification('Sila masukkan minimum topik pendidikan atau cabaran audiens', 'error');
             return;
         }
 
@@ -128,47 +180,47 @@ class FMWriter {
                     "messages": [
                         {
                             "role": "system",
-                            "content": `Anda adalah penulis profesional yang menggunakan gaya penulisan FM dalam Bahasa Malaysia. 
+                            "content": `Anda adalah penulis konten Facebook yang berkongsi ilmu dalam Bahasa Malaysia dengan gaya FM, bersahaja tetapi profesional.
 
-Sila ikut arahan berikut untuk menghasilkan kandungan:
+Sila ikut panduan ini untuk menghasilkan kandungan:
 
-1. Format Penulisan:
-   - Mulakan dengan tajuk yang menarik dan emoji berkaitan
-   - Gunakan ayat pendek dan berkesan
-   - Sediakan senarai dan poin penting
-   - Gunakan pengulangan strategik untuk penekanan
-   - Minimum 1000 patah perkataan
+1. Gaya dan Nada:
+   - Tulis seperti PERBUALAN dengan pembaca, tetapi kekalkan nada profesional
+   - ELAKKAN frasa seperti "artikel ini akan membincangkan", "dalam artikel ini", "kesimpulannya" 
+   - Gunakan "kami" dan "kita", JANGAN gunakan "aku" atau "saya" yang terlalu kasual
+   - Sertakan pengalaman dengan frasa seperti "kami pernah alami", "ramai pelanggan kami bertanya"
+   - Mulakan dengan ayat yang menarik perhatian, bukan pengenalan formal
+   - Guna gaya penulisan sopan dan mesra, tetapi kekalkan profesionalisme
 
 2. Struktur Kandungan:
-   - Pengenalan yang menarik dengan emoji 😊
-   - Penerangan terperinci dengan nombor (1️⃣, 2️⃣, 3️⃣, dst)
-   - Contoh-contoh praktikal dengan label "Contoh:"
-   - Tips dan panduan dengan simbol ✔
-   - Kesimpulan yang berkesan
-   - CTA (Call-to-Action) untuk engagement
-   - Senarai hashtag berkaitan (minimum 5 hashtag)
+   - Mula dengan perkongsian pengalaman atau pemerhatian dengan emoji 😊
+   - Masukkan nombor/poin penting dengan emoji (1️⃣, 2️⃣, 3️⃣, dst)
+   - Sisipkan contoh praktikal dari "pengalaman kami" dengan label "Contoh:"
+   - Kongsi tips berguna dengan simbol ✔
+   - Akhiri dengan soalan terbuka untuk menggalakkan interaksi
+   - Sertakan hashtag berkaitan (5-7 hashtag) 
 
 3. Penggunaan Emoji:
-   Gunakan emoji yang sesuai untuk:
-   - Tajuk utama 🎯
-   - Setiap seksyen utama ⭐
-   - Tips penting 💡
-   - Amaran atau perhatian ⚠️
-   - Contoh 📝
-   - Kesimpulan 🎉
-   - Soalan atau CTA 💭
+   - Gunakan emoji secara sederhana pada tempat yang sesuai: 📚 🤔 💭 💡 ⭐ 🌟 😊 🙌 👍
+   - Letakkan emoji untuk penekanan poin penting
+   - Elakkan terlalu banyak emoji berturutan (maksimum 2)
+   - Gunakan emoji untuk menyokong mesej, bukan menggantikannya
 
-4. Hashtag:
-   - Sertakan minimum 5 hashtag berkaitan
-   - Format: #KataKunci
-   - Letakkan di penghujung artikel
-   - Contoh: #TipsPenulisan #ContentCreator #BahasaMalaysia
+4. Strategi "Soft Selling":
+   - UTAMAKAN perkongsian pengalaman dan ilmu tentang topik
+   - Jika ada produk, sebut dengan profesional seperti "Di [nama perniagaan], kami menawarkan..."
+   - Kongsi PENGALAMAN KAMI dengan produk/perkhidmatan (jika berkaitan)
+   - ELAK ayat hard-sell atau promosi langsung
+   - Fokus pada PENYELESAIAN MASALAH pembaca
 
-5. Gaya Penulisan:
-   - Nada santai tetapi profesional
-   - Gunakan bahasa yang mudah difahami
-   - Masukkan unsur motivasi dan galakan
-   - Buat pembaca rasa seperti berbual dengan kawan`
+5. Teknik Penulisan Bersahaja tetapi Profesional:
+   - Masukkan frasa seperti "Menariknya...", "Perlu diingat...", "Apa yang kami dapati..."
+   - Kadangkala guna ayat tidak lengkap...tetapi dengan tujuan penekanan
+   - Gunakan ayat pendek dan jelas. Ini memudahkan pemahaman.
+   - Masukkan persoalan di tengah kandungan "adakah anda pernah mengalami situasi ini?"
+   - Gunakan HURUF BESAR dengan sederhana untuk penekanan
+   - Kekalkan struktur yang kemas tetapi tidak terlalu formal
+   - Masukkan perkataan Inggeris yang biasa digunakan dalam perbualan profesional`
                         },
                         {
                             "role": "user",
@@ -176,7 +228,7 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
                         }
                     ],
                     "max_tokens": 4000,
-                    "temperature": 0.7
+                    "temperature": 0.75
                 })
             });
 
@@ -188,10 +240,22 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
             }
 
             const data = await response.json();
-            const formattedContent = this.formatContent(data.choices[0].message.content);
+            const generatedContent = data.choices[0].message.content;
+            const formattedContent = this.formatContent(generatedContent);
             this.output.innerHTML = formattedContent;
             this.copyButton.style.display = 'flex';
-            this.showNotification('Kandungan berjaya dijana!', 'success');
+            this.showNotification('Post profesional anda telah siap!', 'success');
+            
+            // Add to history
+            this.addToHistory({
+                product: this.productInput.value.trim(),
+                issues: this.issuesInput.value.trim(),
+                topic: this.topicInput.value.trim(),
+                prompt: this.promptInput.value.trim(),
+                content: generatedContent,
+                timestamp: new Date().toISOString()
+            });
+            
         } catch (error) {
             this.output.innerHTML = `Ralat: ${error.message === 'The operation was aborted' ? 
                 'Masa menunggu telah tamat. Sila cuba lagi.' : error.message}`;
@@ -275,11 +339,11 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
     }
 
     getProgressMessage(progress) {
-        if (progress < 20) return 'Menganalisa topik...';
-        if (progress < 40) return 'Menyusun struktur kandungan...';
-        if (progress < 60) return 'Menghasilkan kandungan terperinci...';
-        if (progress < 80) return 'Menambah contoh dan tips...';
-        return 'Mengemas kini format akhir...';
+        if (progress < 20) return 'Menganalisa topik perkongsian...';
+        if (progress < 40) return 'Menyusun poin-poin utama...';
+        if (progress < 60) return 'Mengumpulkan pengalaman dan penyelesaian...';
+        if (progress < 80) return 'Menyusun kandungan profesional...';
+        return 'Menambah elemen yang relevan & menarik...';
     }
 
     setupCopyButton() {
@@ -463,6 +527,129 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
         
         // Join with varied newlines
         return humanizedLines.join('\n');
+    }
+
+    // History management functions
+    addToHistory(item) {
+        // Limit history to 20 items
+        this.history.unshift(item);
+        if (this.history.length > 20) {
+            this.history.pop();
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('fmWriterHistory', JSON.stringify(this.history));
+        
+        // Refresh history display
+        this.loadHistory();
+    }
+    
+    loadHistory() {
+        this.historyList.innerHTML = '';
+        
+        if (this.history.length === 0) {
+            this.historyList.innerHTML = '<div class="empty-history">Tiada sejarah penulisan dijumpai.</div>';
+            return;
+        }
+        
+        this.history.forEach((item, index) => {
+            const historyItem = this.createHistoryItem(item, index);
+            this.historyList.appendChild(historyItem);
+        });
+    }
+    
+    createHistoryItem(item, index) {
+        const date = new Date(item.timestamp);
+        const formattedDate = date.toLocaleDateString('ms-MY', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Get title from the content (first line)
+        const title = item.content.split('\n')[0] || 'Penulisan Tanpa Tajuk';
+        
+        // Get a short snippet
+        const snippet = item.content.replace(title, '').trim().substring(0, 100) + '...';
+        
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.dataset.index = index;
+        
+        historyItem.innerHTML = `
+            <div class="history-meta">
+                <span class="history-date">${formattedDate}</span>
+                <span class="history-topic">${item.topic || item.product || 'Tiada topik'}</span>
+            </div>
+            <div class="history-title">${title}</div>
+            <div class="history-snippet">${snippet}</div>
+            <div class="history-actions">
+                <button class="history-action-btn load-btn" title="Muat semula">🔄</button>
+                <button class="history-action-btn delete-btn" title="Padam">🗑️</button>
+            </div>
+        `;
+        
+        // Add event listeners
+        historyItem.querySelector('.load-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.loadFromHistory(index);
+        });
+        
+        historyItem.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteFromHistory(index);
+        });
+        
+        // Load content when clicking on the item
+        historyItem.addEventListener('click', () => {
+            this.loadContentFromHistory(index);
+        });
+        
+        return historyItem;
+    }
+    
+    loadFromHistory(index) {
+        const item = this.history[index];
+        if (!item) return;
+        
+        this.productInput.value = item.product || '';
+        this.issuesInput.value = item.issues || '';
+        this.topicInput.value = item.topic || '';
+        this.promptInput.value = item.prompt || '';
+        
+        this.showNotification('Input telah dimuat! Sedia untuk cipta post profesional baru.', 'success');
+    }
+    
+    loadContentFromHistory(index) {
+        const item = this.history[index];
+        if (!item) return;
+        
+        const formattedContent = this.formatContent(item.content);
+        this.output.innerHTML = formattedContent;
+        this.copyButton.style.display = 'flex';
+        
+        // Scroll to output
+        this.output.scrollIntoView({ behavior: 'smooth' });
+        
+        this.showNotification('Post profesional tersimpan berjaya dimuat!', 'success');
+    }
+    
+    deleteFromHistory(index) {
+        this.history.splice(index, 1);
+        localStorage.setItem('fmWriterHistory', JSON.stringify(this.history));
+        this.loadHistory();
+        this.showNotification('Item sejarah telah dipadam', 'success');
+    }
+    
+    clearHistory() {
+        if (confirm('Adakah anda pasti mahu memadamkan semua sejarah penulisan?')) {
+            this.history = [];
+            localStorage.setItem('fmWriterHistory', JSON.stringify(this.history));
+            this.loadHistory();
+            this.showNotification('Semua sejarah penulisan telah dipadamkan', 'success');
+        }
     }
 }
 

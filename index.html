@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Penjana Penulisan FM - Alat untuk menjana kandungan penulisan dalam gaya FM">
-    <meta name="keywords" content="penulisan, fm, content creator, penjana kandungan">
+    <meta name="description" content="Penjana Post Facebook FM - Alat untuk menjana kandungan profesional dalam gaya FM">
+    <meta name="keywords" content="penulisan, fm, content creator, penjana kandungan, facebook post, soft selling, profesional">
     <meta name="theme-color" content="#4a90e2">
-    <title>Penjana Penulisan FM</title>
+    <title>Penjana Post Facebook FM</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://openrouter.ai">
 </head>
 <body class="dark-theme">
     <div class="container">
         <header>
-            <h1>Penjana Penulisan FM</h1>
+            <h1>Penjana Post Facebook FM</h1>
             <div class="theme-toggle">
                 <button id="themeToggle" aria-label="Tukar tema">
                     <span class="light-icon" aria-hidden="true">☀️</span>
@@ -36,38 +36,78 @@
 
         <main class="content">
             <div class="input-section">
-                <label for="promptInput" class="visually-hidden">Topik penulisan</label>
-                <textarea 
-                    id="promptInput" 
-                    placeholder="Masukkan topik penulisan anda di sini..." 
-                    aria-label="Topik penulisan"
-                    rows="6"
-                ></textarea>
-                <button id="generateBtn" aria-label="Jana penulisan">
+                <div class="form-group">
+                    <label for="productInput">Produk/Perkhidmatan (jika berkaitan)</label>
+                    <input 
+                        type="text" 
+                        id="productInput" 
+                        placeholder="Produk atau perkhidmatan yang ditawarkan oleh syarikat anda" 
+                        aria-label="Produk atau perkhidmatan"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="issuesInput">Masalah Pembaca/Pelanggan</label>
+                    <input 
+                        type="text" 
+                        id="issuesInput" 
+                        placeholder="Cabaran atau masalah yang dihadapi oleh pelanggan/pembaca" 
+                        aria-label="Masalah pembaca/pelanggan"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="topicInput">Perkongsian Ilmu & Pengalaman</label>
+                    <input 
+                        type="text" 
+                        id="topicInput" 
+                        placeholder="Tip atau ilmu yang ingin kami kongsikan dengan pembaca" 
+                        aria-label="Perkongsian ilmu dan pengalaman"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="promptInput">Maklumat & Pengalaman Tambahan</label>
+                    <textarea 
+                        id="promptInput" 
+                        placeholder="Pengalaman, pemerhatian atau maklumat tambahan yang boleh menyokong perkongsian kami..." 
+                        aria-label="Maklumat dan pengalaman tambahan"
+                        rows="4"
+                    ></textarea>
+                </div>
+                <button id="generateBtn" aria-label="Jana post Facebook">
                     <span aria-hidden="true">✨</span>
-                    <span>Jana Penulisan</span>
+                    <span>Jana Post Facebook</span>
                 </button>
             </div>
 
             <div class="output-section">
                 <div id="loadingIndicator" class="hidden" aria-hidden="true">
-                    <div class="spinner" aria-label="Sedang menjana penulisan"></div>
-                    <p>Sedang menjana penulisan...</p>
+                    <div class="spinner" aria-label="Sedang menyediakan post Facebook"></div>
+                    <p>Sedang menyediakan post professional anda...</p>
                 </div>
                 <div class="output-header">
-                    <h3>Hasil Penulisan</h3>
-                    <button id="copyButton" class="copy-button" title="Salin ke clipboard" aria-label="Salin hasil penulisan">
+                    <h3>Post Facebook Anda</h3>
+                    <button id="copyButton" class="copy-button" title="Salin ke clipboard" aria-label="Salin post Facebook">
                         <span class="copy-icon" aria-hidden="true">📋</span>
                         <span class="copy-text">Salin</span>
                     </button>
                 </div>
-                <div id="output" class="output-content" role="region" aria-label="Hasil penulisan"></div>
+                <div id="output" class="output-content" role="region" aria-label="Post Facebook anda"></div>
+            </div>
+            
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>Post Tersimpan</h3>
+                    <button id="clearHistoryBtn" aria-label="Kosongkan Sejarah">
+                        <span aria-hidden="true">🗑️</span>
+                        <span>Kosongkan</span>
+                    </button>
+                </div>
+                <div id="historyList" class="history-list"></div>
             </div>
         </main>
 
         <footer>
-            <p>Dibina dengan ❤️ untuk penulis FM</p>
-            <p class="version">Versi 1.0.0</p>
+            <p>Dibina dengan ❤️ untuk penulis konten Facebook profesional</p>
+            <p class="version">Versi 1.0.3</p>
         </footer>
     </div>
     <script src="script.js"></script>
