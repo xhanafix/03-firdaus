@@ -1,10 +1,13 @@
 class FMWriter {
     constructor() {
         this.apiKey = localStorage.getItem('openRouterApiKey');
+        this.lastRequestTime = 0;
+        this.minRequestInterval = 2000; // Minimum 2 seconds between requests
         this.initializeElements();
         this.setupEventListeners();
         this.copyButton = document.getElementById('copyButton');
         this.setupCopyButton();
+        this.setupAutoSave();
     }
 
     initializeElements() {
@@ -31,11 +34,21 @@ class FMWriter {
 
     saveApiKey() {
         const key = this.apiKeyInput.value.trim();
-        if (key) {
-            localStorage.setItem('openRouterApiKey', key);
-            this.apiKey = key;
-            this.apiSetup.style.display = 'none';
+        if (!key) {
+            this.showNotification('Sila masukkan API key yang sah', 'error');
+            return;
         }
+        
+        // Basic API key validation
+        if (!key.startsWith('sk-')) {
+            this.showNotification('API key tidak sah. Sila pastikan format yang betul.', 'error');
+            return;
+        }
+
+        localStorage.setItem('openRouterApiKey', key);
+        this.apiKey = key;
+        this.apiSetup.style.display = 'none';
+        this.showNotification('API key berjaya disimpan!', 'success');
     }
 
     toggleTheme() {
@@ -43,17 +56,57 @@ class FMWriter {
         localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
     }
 
+    setupAutoSave() {
+        // Auto-save prompt every 30 seconds
+        setInterval(() => {
+            const prompt = this.promptInput.value.trim();
+            if (prompt) {
+                localStorage.setItem('lastPrompt', prompt);
+            }
+        }, 30000);
+
+        // Restore last prompt
+        const lastPrompt = localStorage.getItem('lastPrompt');
+        if (lastPrompt) {
+            this.promptInput.value = lastPrompt;
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
     async generateContent() {
         if (!this.apiKey) {
-            alert('Sila masukkan API key terlebih dahulu');
+            this.showNotification('Sila masukkan API key terlebih dahulu', 'error');
             return;
         }
 
         const prompt = this.promptInput.value.trim();
         if (!prompt) {
-            alert('Sila masukkan topik penulisan');
+            this.showNotification('Sila masukkan topik penulisan', 'error');
             return;
         }
+
+        // Rate limiting
+        const now = Date.now();
+        if (now - this.lastRequestTime < this.minRequestInterval) {
+            this.showNotification('Sila tunggu sebentar sebelum membuat permintaan baru', 'warning');
+            return;
+        }
+        this.lastRequestTime = now;
 
         this.loadingIndicator.classList.remove('hidden');
         this.output.innerHTML = '';
@@ -61,7 +114,7 @@ class FMWriter {
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minutes timeout
+            const timeoutId = setTimeout(() => controller.abort(), 180000);
 
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
@@ -129,14 +182,21 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
 
             clearTimeout(timeoutId);
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Ralat API');
+            }
+
             const data = await response.json();
             const formattedContent = this.formatContent(data.choices[0].message.content);
             this.output.innerHTML = formattedContent;
             this.copyButton.style.display = 'flex';
+            this.showNotification('Kandungan berjaya dijana!', 'success');
         } catch (error) {
             this.output.innerHTML = `Ralat: ${error.message === 'The operation was aborted' ? 
                 'Masa menunggu telah tamat. Sila cuba lagi.' : error.message}`;
             this.copyButton.style.display = 'none';
+            this.showNotification(error.message, 'error');
         } finally {
             this.loadingIndicator.classList.add('hidden');
             this.hideProgressIndicator();
@@ -227,11 +287,95 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
     }
 
     async copyOutputToClipboard() {
-        const content = this.output.textContent;
+        const content = this.output.innerHTML;
         if (!content) return;
 
         try {
-            await navigator.clipboard.writeText(content);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+
+            let formattedText = '';
+            
+            // Process with human-like formatting
+            for (const element of tempDiv.children) {
+                if (element.tagName === 'H1') {
+                    // Main title with varied spacing (humans don't always use perfect spacing)
+                    formattedText += element.textContent + '\n\n';
+                } else if (element.tagName === 'H2') {
+                    // Section headers with emojis - humans often put spaces around emojis
+                    let text = element.textContent;
+                    // Add occasional space after emoji (not always consistent)
+                    text = text.replace(/([🏠✨😬💪📝🎯⭐💡⚠️🎉💭😊📌🎨🌟🔍💻🚀🎓💎🌈])/g, '$1 ');
+                    formattedText += '\n' + text + '\n\n';
+                } else if (element.tagName === 'P') {
+                    // Regular paragraphs with natural spacing
+                    const text = element.textContent.trim();
+                    if (text) {
+                        // Humans often write in shorter paragraphs on social media
+                        const sentences = text.split(/(?<=[.!?])\s+/);
+                        for (let i = 0; i < sentences.length; i++) {
+                            formattedText += sentences[i] + (i < sentences.length-1 ? '\n' : '\n\n');
+                        }
+                    }
+                } else if (element.tagName === 'DIV') {
+                    if (element.classList.contains('checkmark-item')) {
+                        // Checkmark items with more natural formatting
+                        const text = element.textContent.replace('✔', '').trim();
+                        formattedText += '✓ ' + text + '\n';
+                    } else if (element.classList.contains('bullet-item')) {
+                        // Humans use different bullet styles
+                        const text = element.textContent.replace('•', '').trim();
+                        // Randomly choose bullet style
+                        const bullets = ['-', '•', '*'];
+                        const bullet = bullets[Math.floor(Math.random() * bullets.length)];
+                        formattedText += bullet + ' ' + text + '\n';
+                    } else if (element.classList.contains('example')) {
+                        // Examples with more natural formatting
+                        const text = element.textContent.replace('Contoh:', '').trim();
+                        formattedText += 'Contoh: ' + text + '\n\n';
+                    } else if (element.classList.contains('pro-tip')) {
+                        // Pro tips with human emphasis
+                        const text = element.textContent.trim();
+                        formattedText += '💡 Pro Tip: ' + text + '\n\n';
+                    } else if (element.classList.contains('cta-section')) {
+                        // CTA with natural emphasis
+                        const text = element.textContent.trim();
+                        formattedText += text + '\n\n';
+                    } else {
+                        // Other div content with natural spacing
+                        const text = element.textContent.trim();
+                        if (text) {
+                            formattedText += text + '\n\n';
+                        }
+                    }
+                }
+            }
+
+            // Process hashtags like a human would
+            const hashtags = formattedText.match(/#\w+/g) || [];
+            if (hashtags.length > 0) {
+                formattedText += '\n\n';
+                
+                // Humans often group related hashtags
+                let hashtagText = '';
+                hashtags.forEach((tag, index) => {
+                    // Sometimes add space, sometimes don't
+                    hashtagText += tag + (Math.random() > 0.3 ? ' ' : '');
+                    
+                    // Occasional line break
+                    if (index % 3 === 2 && index < hashtags.length - 1) {
+                        hashtagText += '\n';
+                    }
+                });
+                
+                formattedText += hashtagText;
+            }
+
+            // Humanize text
+            formattedText = this.humanizeText(formattedText);
+
+            // Copy to clipboard
+            await navigator.clipboard.writeText(formattedText);
             
             // Visual feedback
             this.copyButton.classList.add('copied');
@@ -246,10 +390,79 @@ Sila ikut arahan berikut untuk menghasilkan kandungan:
                 this.copyButton.querySelector('.copy-icon').textContent = '📋';
             }, 2000);
 
+            this.showNotification('Teks berjaya disalin dalam format yang semulajadi!', 'success');
+
         } catch (err) {
             console.error('Failed to copy text: ', err);
-            alert('Tidak dapat menyalin teks. Sila cuba lagi.');
+            this.showNotification('Tidak dapat menyalin teks. Sila cuba lagi.', 'error');
         }
+    }
+    
+    humanizeText(text) {
+        // Varied line spacing (humans aren't consistent with spacing)
+        text = text
+            // Replace excessive newlines but with some randomness
+            .replace(/\n{4,}/g, '\n'.repeat(2 + Math.floor(Math.random() * 2)))
+            // Sometimes single, sometimes double breaks after sentences
+            .replace(/([.!?])\s*/g, (match, p1) => Math.random() > 0.4 ? p1 + '\n\n' : p1 + '\n')
+            // Clean up any excessive breaks that might have been created
+            .replace(/\n{5,}/g, '\n\n\n')
+            .trim();
+            
+        // Add occasional natural typing patterns
+        const lines = text.split('\n');
+        let humanizedLines = [];
+        
+        for (let line of lines) {
+            // Skip empty lines
+            if (!line.trim()) {
+                humanizedLines.push(line);
+                continue;
+            }
+            
+            // Occasionally add human typing quirks
+            if (Math.random() < 0.05 && line.length > 10) {
+                // Occasionally capitalize words for emphasis (1% chance per line)
+                const words = line.split(' ');
+                if (words.length > 3) {
+                    const randomIndex = Math.floor(Math.random() * words.length);
+                    if (words[randomIndex].length > 3) {
+                        words[randomIndex] = words[randomIndex].toUpperCase();
+                        line = words.join(' ');
+                    }
+                }
+            }
+            
+            // Occasionally make typos and then correct them
+            if (Math.random() < 0.02 && line.length > 20) {
+                const words = line.split(' ');
+                if (words.length > 4) {
+                    const randomIndex = Math.floor(Math.random() * words.length);
+                    const word = words[randomIndex];
+                    if (word.length > 4) {
+                        // Create a simple typo and correction
+                        const typoIndex = Math.floor(Math.random() * (word.length - 2)) + 1;
+                        const swappedChar = word[typoIndex];
+                        const swappedWithChar = word[typoIndex + 1];
+                        
+                        // Make the typo by swapping characters
+                        const typedWord = word.substring(0, typoIndex) + 
+                                        swappedWithChar + 
+                                        swappedChar + 
+                                        word.substring(typoIndex + 2);
+                        
+                        // "Correct" the typo
+                        words[randomIndex] = typedWord + '* ' + word;
+                        line = words.join(' ');
+                    }
+                }
+            }
+            
+            humanizedLines.push(line);
+        }
+        
+        // Join with varied newlines
+        return humanizedLines.join('\n');
     }
 }
 

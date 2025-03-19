@@ -51,10 +51,23 @@ textarea {
     min-height: 150px;
     padding: 1rem;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     margin-bottom: 1rem;
     background-color: inherit;
     color: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    resize: vertical;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.dark-theme textarea:focus {
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
 }
 
 button {
@@ -64,15 +77,25 @@ button {
     background-color: var(--primary-light);
     color: white;
     cursor: pointer;
-    transition: opacity 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 .dark-theme button {
     background-color: var(--primary-dark);
-}
-
-button:hover {
-    opacity: 0.9;
 }
 
 .output-content {
@@ -88,10 +111,15 @@ button:hover {
 .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid #f3f3f3;
+    border: 4px solid rgba(255, 255, 255, 0.1);
     border-top: 4px solid var(--primary-light);
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+.dark-theme .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--primary-dark);
 }
 
 .hidden {
@@ -338,4 +366,96 @@ button:hover {
 
 .dark-theme .hashtag-container {
     background: rgba(100, 181, 246, 0.08);
+}
+
+/* Add notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    background: var(--bg-light);
+    color: var(--text-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    max-width: 400px;
+    font-size: 0.95rem;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: #4caf50;
+    color: white;
+}
+
+.notification.error {
+    background: #f44336;
+    color: white;
+}
+
+.notification.warning {
+    background: #ff9800;
+    color: white;
+}
+
+/* Improve API setup section */
+.api-setup {
+    background: var(--secondary-light);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.dark-theme .api-setup {
+    background: var(--secondary-dark);
+}
+
+.api-setup input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    background-color: inherit;
+    color: inherit;
+}
+
+.api-setup input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.dark-theme .api-setup input:focus {
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
+}
+
+/* Add smooth transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 768px) {
+    .notification {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+    
+    .api-setup {
+        padding: 1rem;
+    }
+    
+    button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }

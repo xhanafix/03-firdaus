@@ -3,48 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Penjana Penulisan FM - Alat untuk menjana kandungan penulisan dalam gaya FM">
+    <meta name="keywords" content="penulisan, fm, content creator, penjana kandungan">
+    <meta name="theme-color" content="#4a90e2">
     <title>Penjana Penulisan FM</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://openrouter.ai">
 </head>
 <body class="dark-theme">
     <div class="container">
         <header>
             <h1>Penjana Penulisan FM</h1>
             <div class="theme-toggle">
-                <button id="themeToggle">
-                    <span class="light-icon">☀️</span>
-                    <span class="dark-icon">🌙</span>
+                <button id="themeToggle" aria-label="Tukar tema">
+                    <span class="light-icon" aria-hidden="true">☀️</span>
+                    <span class="dark-icon" aria-hidden="true">🌙</span>
                 </button>
             </div>
         </header>
 
         <div class="api-setup" id="apiSetup">
             <h2>Tetapan API</h2>
-            <input type="password" id="apiKey" placeholder="Masukkan API key OpenRouter">
-            <button id="saveApiKey">Simpan API Key</button>
+            <div class="api-input-wrapper">
+                <input type="password" id="apiKey" placeholder="Masukkan API key OpenRouter" aria-label="API key">
+                <button id="saveApiKey" aria-label="Simpan API key">
+                    <span aria-hidden="true">💾</span>
+                    <span>Simpan API Key</span>
+                </button>
+            </div>
+            <p class="api-help">Dapatkan API key anda di <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer">OpenRouter</a></p>
         </div>
 
         <main class="content">
             <div class="input-section">
-                <textarea id="promptInput" placeholder="Masukkan topik penulisan anda di sini..."></textarea>
-                <button id="generateBtn">Jana Penulisan</button>
+                <label for="promptInput" class="visually-hidden">Topik penulisan</label>
+                <textarea 
+                    id="promptInput" 
+                    placeholder="Masukkan topik penulisan anda di sini..." 
+                    aria-label="Topik penulisan"
+                    rows="6"
+                ></textarea>
+                <button id="generateBtn" aria-label="Jana penulisan">
+                    <span aria-hidden="true">✨</span>
+                    <span>Jana Penulisan</span>
+                </button>
             </div>
 
             <div class="output-section">
-                <div id="loadingIndicator" class="hidden">
-                    <div class="spinner"></div>
+                <div id="loadingIndicator" class="hidden" aria-hidden="true">
+                    <div class="spinner" aria-label="Sedang menjana penulisan"></div>
                     <p>Sedang menjana penulisan...</p>
                 </div>
                 <div class="output-header">
                     <h3>Hasil Penulisan</h3>
-                    <button id="copyButton" class="copy-button" title="Salin ke clipboard">
-                        <span class="copy-icon">📋</span>
+                    <button id="copyButton" class="copy-button" title="Salin ke clipboard" aria-label="Salin hasil penulisan">
+                        <span class="copy-icon" aria-hidden="true">📋</span>
                         <span class="copy-text">Salin</span>
                     </button>
                 </div>
-                <div id="output" class="output-content"></div>
+                <div id="output" class="output-content" role="region" aria-label="Hasil penulisan"></div>
             </div>
         </main>
+
+        <footer>
+            <p>Dibina dengan ❤️ untuk penulis FM</p>
+            <p class="version">Versi 1.0.0</p>
+        </footer>
     </div>
     <script src="script.js"></script>
 </body>
